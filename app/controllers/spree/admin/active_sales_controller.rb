@@ -43,6 +43,23 @@ module Spree
         end
       end
 
+      def destroy
+        invoke_callbacks(:destroy, :before)
+        if @object.active_sale_events.destroy_all and @object.destroy
+          invoke_callbacks(:destroy, :after)
+          flash[:success] = flash_message_for(@object, :successfully_removed)
+          respond_with(@object) do |format|
+            format.html { redirect_to location_after_destroy }
+            format.js   { render :partial => "spree/admin/shared/destroy" }
+          end
+        else
+          invoke_callbacks(:destroy, :fails)
+          respond_with(@object) do |format|
+            format.html { redirect_to location_after_destroy }
+          end
+        end
+      end
+
       protected
 
         def collection
